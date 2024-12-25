@@ -1,20 +1,74 @@
 import { Request, Response } from "express"
-export function listProducts(req: Request, res: Response) {
-    res.send('List of products')
+import { db } from "../../db/index"
+import { productsTable } from "../../db/productSchema"
+import { eq } from "drizzle-orm"
+export async function listProducts(req: Request, res: Response) {
+    try {
+        const products = await db.select().from(productsTable)
+        res.status(200).json({"Products": products})
+    }
+
+    catch(e) {
+        res.status(500).json({error: e})
+    }
 }
 
-export function getProductById(req: Request, res: Response) {
-    res.send({id: req.params.id})
+export async function getProductById(req: Request, res: Response) {
+    try {
+        const {id} = req.params
+        const [product] = await db.select().from(productsTable).where(eq(productsTable.id, parseInt(id)))
+        if(!product) {
+            res.status(404).json({error: "Product not found"})
+            return
+        }
+        res.status(200).json({"Product": product})
+    }
+
+    catch(e) {
+        res.status(500).json({error: e})
+    }
 }
 
-export function createProduct(req: Request, res: Response) {
-    res.send("New product created")
+export async function createProduct(req: Request, res: Response) {
+    try {
+        const [product] =await db.insert(productsTable).values(req.body).returning()
+        res.status(201).json({"Product": product})
+    }
+
+    catch(e) {
+        res.status(500).json({error: e})
+    }
 }
 
-export function updateProduct(req: Request, res: Response) {
-    res.send("Product updated")
+export async function updateProduct(req: Request, res: Response) {
+    try {
+        const {id} = req.params
+        const [product] = await db.update(productsTable).set(req.body).where(eq(productsTable.id, parseInt(id))).returning()
+        if(!product) {
+            res.status(404).json({error: "Product not found"})
+            return
+        }
+        res.status(200).json({"Product": product})
+    }
+
+    catch(e) {
+        res.status(500).json({error: e})
+    }
 }
 
-export function deleteProduct(req: Request, res: Response) {
-    res.send("Product deleted")
+export async function deleteProduct(req: Request, res: Response) {
+    try {
+        const {id} = req.params
+        const [deletedProduct] = await db.delete(productsTable).where(eq(productsTable.id, parseInt(id))).returning()
+        if(!deletedProduct) {
+            res.status(404).json({error: "Product not found"})
+            return
+        }
+        res.status(204).json({"Product": deleteProduct})
+
+    }
+
+    catch(e) {
+        res.status(500).json({error: e})
+    }
 }
