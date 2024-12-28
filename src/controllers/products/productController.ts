@@ -1,9 +1,8 @@
 import { Request, Response } from "express"
-import { db } from "../../db/index"
-import { productsTable } from "../../db/productSchema"
+import { db } from "../../db/index.js"
+import { productsTable } from "../../db/productSchema.js"
 import { eq } from "drizzle-orm"
 import _ from "lodash"
-import { createProductSchema } from "../../db/productSchema"
 export async function listProducts(req: Request, res: Response) {
     try {
         const products = await db.select().from(productsTable)

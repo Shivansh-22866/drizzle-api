@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { createProduct, deleteProduct, getProductById, listProducts, updateProduct } from "../../controllers/products/productController";
-import { validateData } from "../../middlewares/validationMiddleware";
+import { createProduct, deleteProduct, getProductById, listProducts, updateProduct } from "../../controllers/products/productController.js";
+import { validateData } from "../../middlewares/validationMiddleware.js";
 // import {z} from "zod"
-import { createProductSchema, updateProductSchema, productsTable } from "../../db/productSchema";
+import { createProductSchema, updateProductSchema, productsTable } from "../../db/productSchema.js";
+import { verifySeller, verifyToken } from "../../middlewares/authMiddleware.js";
 
 // const createProductSchema = z.object({
 //     name: z.string(),
@@ -17,10 +18,10 @@ router.get('/', listProducts)
 
 router.get('/:id', getProductById)
 
-router.post("/", validateData(createProductSchema), createProduct)
+router.post("/", verifyToken, verifySeller, validateData(createProductSchema), createProduct)
 
-router.delete("/:id", deleteProduct)
+router.delete("/:id", verifyToken, verifySeller, deleteProduct)
 
-router.put("/:id", validateData(updateProductSchema), updateProduct)
+router.put("/:id", verifyToken, verifySeller, validateData(updateProductSchema), updateProduct)
 
 export default router
